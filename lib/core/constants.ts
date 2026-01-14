@@ -20,7 +20,20 @@
 export const SHAKE_THRESHOLD = 1.78;
 
 /**
- * Otras constantes que podríamos necesitar
+ * Valores del dado
  */
 export const MIN_DICE_VALUE = 1;
 export const MAX_DICE_VALUE = 6;
+
+/**
+ * SHAKE_COOLDOWN: Tiempo mínimo entre detecciones de shake (en milisegundos)
+ * 
+ * Valor: 500ms
+ * 
+ * Razón:
+ * - Evita que una sola agitación genere múltiples números
+ * - El acelerómetro se actualiza 10 veces por segundo (cada 100ms)
+ * - Una agitación típica dura 200-400ms
+ * - 500ms es suficiente para distinguir entre agitaciones separadas
+ */
+export const SHAKE_COOLDOWN = 500;

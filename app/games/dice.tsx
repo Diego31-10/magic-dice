@@ -1,14 +1,42 @@
 import { View, Text, StyleSheet } from 'react-native';
+import { useEffect, useState, useRef } from 'react';
 import { useAccelerometer } from '../../lib/modules/sensors/accelerometer/useAccelerometer';
 import { isShaking, calculateMagnitude } from '../../lib/core/logic/motion';
-import { SHAKE_THRESHOLD } from '../../lib/core/constants';
+import { generateRandomNumber, canGenerateNumber } from '../../lib/core/logic/dice';
+import { SHAKE_THRESHOLD, SHAKE_COOLDOWN } from '../../lib/core/constants';
 
 export default function DiceGame() {
   const { data, isAvailable } = useAccelerometer();
+  
+  // Estado del juego
+  const [diceNumber, setDiceNumber] = useState<number | null>(null);
+  const [lastShakeTime, setLastShakeTime] = useState<number | null>(null);
+  const [isInCooldown, setIsInCooldown] = useState(false);
 
   // Calcular magnitud y detectar shake
   const magnitude = calculateMagnitude(data);
   const shakeDetected = isShaking(data);
+
+  // Efecto para generar número cuando se detecta shake
+  useEffect(() => {
+    if (shakeDetected && canGenerateNumber(lastShakeTime, SHAKE_COOLDOWN)) {
+      // Generar nuevo número
+      const newNumber = generateRandomNumber();
+      setDiceNumber(newNumber);
+      
+      // Actualizar tiempo del último shake
+      const now = Date.now();
+      setLastShakeTime(now);
+      
+      // Activar cooldown visual
+      setIsInCooldown(true);
+      
+      // Desactivar cooldown después del tiempo configurado
+      setTimeout(() => {
+        setIsInCooldown(false);
+      }, SHAKE_COOLDOWN);
+    }
+  }, [shakeDetected, lastShakeTime]);
 
   if (!isAvailable) {
     return (
@@ -25,57 +53,64 @@ export default function DiceGame() {
     <View style={styles.container}>
       <Text style={styles.title}>🎲 Magic Dice</Text>
       
-      {/* Indicador visual de shake */}
+      {/* Resultado del dado */}
+      <View style={styles.resultContainer}>
+        {diceNumber === null ? (
+          <>
+            <Text style={styles.waitingIcon}>🎲</Text>
+            <Text style={styles.waitingText}>Agita el dispositivo</Text>
+          </>
+        ) : (
+          <>
+            <Text style={styles.diceNumber}>{diceNumber}</Text>
+            <Text style={styles.resultLabel}>Resultado</Text>
+          </>
+        )}
+      </View>
+
+      {/* Indicador de cooldown */}
+      {isInCooldown && (
+        <View style={styles.cooldownIndicator}>
+          <Text style={styles.cooldownText}>⏱️ Cooldown activo...</Text>
+        </View>
+      )}
+
+      {/* Indicador de shake */}
       <View style={[
         styles.shakeIndicator, 
-        shakeDetected && styles.shakeIndicatorActive
+        shakeDetected && !isInCooldown && styles.shakeIndicatorActive
       ]}>
         <Text style={styles.shakeText}>
-          {shakeDetected ? '🔥 SHAKE DETECTADO!' : '⏳ En espera...'}
+          {shakeDetected && !isInCooldown ? '🔥 SHAKE!' : '⏳ En espera...'}
         </Text>
       </View>
 
-      {/* Información del sensor */}
-      <View style={styles.dataContainer}>
-        <Text style={styles.sectionTitle}>Valores del Sensor:</Text>
+      {/* Información del sensor (para debug) */}
+      <View style={styles.debugContainer}>
+        <Text style={styles.debugTitle}>Debug Info:</Text>
         
-        <View style={styles.valueRow}>
-          <Text style={styles.axis}>X:</Text>
-          <Text style={styles.value}>{data.x.toFixed(3)}</Text>
-        </View>
-        
-        <View style={styles.valueRow}>
-          <Text style={styles.axis}>Y:</Text>
-          <Text style={styles.value}>{data.y.toFixed(3)}</Text>
-        </View>
-        
-        <View style={styles.valueRow}>
-          <Text style={styles.axis}>Z:</Text>
-          <Text style={styles.value}>{data.z.toFixed(3)}</Text>
-        </View>
-
-        <View style={styles.divider} />
-
-        {/* Magnitud calculada */}
-        <View style={styles.magnitudeRow}>
-          <Text style={styles.magnitudeLabel}>Magnitud:</Text>
+        <View style={styles.debugRow}>
+          <Text style={styles.debugLabel}>Magnitud:</Text>
           <Text style={[
-            styles.magnitudeValue,
-            magnitude > SHAKE_THRESHOLD && styles.magnitudeValueHigh
+            styles.debugValue,
+            magnitude > SHAKE_THRESHOLD && styles.debugValueHigh
           ]}>
             {magnitude.toFixed(3)}
           </Text>
         </View>
 
-        <View style={styles.thresholdRow}>
-          <Text style={styles.thresholdLabel}>Umbral:</Text>
-          <Text style={styles.thresholdValue}>{SHAKE_THRESHOLD.toFixed(3)}</Text>
+        <View style={styles.debugRow}>
+          <Text style={styles.debugLabel}>Umbral:</Text>
+          <Text style={styles.debugValue}>{SHAKE_THRESHOLD.toFixed(3)}</Text>
+        </View>
+
+        <View style={styles.debugRow}>
+          <Text style={styles.debugLabel}>X / Y / Z:</Text>
+          <Text style={styles.debugValue}>
+            {data.x.toFixed(2)} / {data.y.toFixed(2)} / {data.z.toFixed(2)}
+          </Text>
         </View>
       </View>
-
-      <Text style={styles.instruction}>
-        📱 Agita el dispositivo para detectar shake
-      </Text>
     </View>
   );
 }
@@ -92,7 +127,51 @@ const styles = StyleSheet.create({
     fontSize: 36,
     color: '#fff',
     fontWeight: 'bold',
+    marginBottom: 40,
+  },
+  resultContainer: {
+    backgroundColor: '#16213e',
+    width: 200,
+    height: 200,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 30,
+    borderWidth: 3,
+    borderColor: '#6c5ce7',
+  },
+  waitingIcon: {
+    fontSize: 64,
+    marginBottom: 10,
+  },
+  waitingText: {
+    fontSize: 16,
+    color: '#a0a0a0',
+    textAlign: 'center',
+  },
+  diceNumber: {
+    fontSize: 96,
+    color: '#6c5ce7',
+    fontWeight: 'bold',
+  },
+  resultLabel: {
+    fontSize: 14,
+    color: '#a0a0a0',
+    marginTop: 10,
+    textTransform: 'uppercase',
+    letterSpacing: 2,
+  },
+  cooldownIndicator: {
+    backgroundColor: '#ff6b6b',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginBottom: 15,
+  },
+  cooldownText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
   },
   shakeIndicator: {
     backgroundColor: '#16213e',
@@ -108,88 +187,40 @@ const styles = StyleSheet.create({
     borderColor: '#a29bfe',
   },
   shakeText: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#fff',
     fontWeight: 'bold',
   },
-  dataContainer: {
+  debugContainer: {
     backgroundColor: '#16213e',
-    padding: 25,
+    padding: 20,
     borderRadius: 15,
     width: '100%',
     maxWidth: 350,
   },
-  sectionTitle: {
-    fontSize: 14,
-    color: '#a0a0a0',
-    marginBottom: 15,
-    textAlign: 'center',
+  debugTitle: {
+    fontSize: 12,
+    color: '#636e72',
+    marginBottom: 10,
     textTransform: 'uppercase',
     letterSpacing: 1,
   },
-  valueRow: {
+  debugRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 8,
   },
-  axis: {
-    fontSize: 20,
-    color: '#6c5ce7',
-    fontWeight: 'bold',
-    width: 40,
-  },
-  value: {
-    fontSize: 20,
-    color: '#fff',
-    fontFamily: 'monospace',
-    flex: 1,
-    textAlign: 'right',
-  },
-  divider: {
-    height: 1,
-    backgroundColor: '#2d3561',
-    marginVertical: 15,
-  },
-  magnitudeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  magnitudeLabel: {
-    fontSize: 16,
+  debugLabel: {
+    fontSize: 12,
     color: '#a0a0a0',
-    fontWeight: '600',
   },
-  magnitudeValue: {
-    fontSize: 24,
+  debugValue: {
+    fontSize: 12,
     color: '#74b9ff',
     fontFamily: 'monospace',
-    fontWeight: 'bold',
   },
-  magnitudeValueHigh: {
+  debugValueHigh: {
     color: '#00b894',
-  },
-  thresholdRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  thresholdLabel: {
-    fontSize: 14,
-    color: '#636e72',
-  },
-  thresholdValue: {
-    fontSize: 16,
-    color: '#636e72',
-    fontFamily: 'monospace',
-  },
-  instruction: {
-    fontSize: 14,
-    color: '#a0a0a0',
-    marginTop: 30,
-    textAlign: 'center',
   },
   errorText: {
     fontSize: 24,
