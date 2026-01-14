@@ -37,3 +37,19 @@ export const MAX_DICE_VALUE = 6;
  * - 500ms es suficiente para distinguir entre agitaciones separadas
  */
 export const SHAKE_COOLDOWN = 500;
+
+/**
+ * Constantes para animaciones 3D
+ */
+
+/**
+ * ANIMATION_DURATION: Duración de la animación del dado (en milisegundos)
+ * Tiempo que tarda el dado en rotar y detenerse
+ */
+export const ANIMATION_DURATION = 1500;
+
+/**
+ * ROTATION_SPEED: Velocidad de rotación durante el shake
+ * Valor más alto = rotación más rápida
+ */
+export const ROTATION_SPEED = 0.1;
