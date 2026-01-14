@@ -1,9 +1,10 @@
 import { Canvas } from '@react-three/fiber/native';
 import { Suspense } from 'react';
 import { DiceModel } from './DiceModel';
+import { DiceRotation } from './utils/rotations';
 
 type SceneProps = {
-  rotation: [number, number, number];
+  rotation: DiceRotation;
   diceScale?: number;
 };
 

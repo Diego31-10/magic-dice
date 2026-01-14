@@ -13,7 +13,7 @@ export default function DiceGame() {
   const [diceNumber, setDiceNumber] = useState<number | null>(null);
   const [lastShakeTime, setLastShakeTime] = useState<number | null>(null);
   const [isInCooldown, setIsInCooldown] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const [isCurrentlyShaking, setIsCurrentlyShaking] = useState(false);
 
   // Calcular magnitud y detectar shake
   const magnitude = calculateMagnitude(data);
@@ -22,15 +22,15 @@ export default function DiceGame() {
   // Efecto para generar número cuando se detecta shake
   useEffect(() => {
     if (shakeDetected && canGenerateNumber(lastShakeTime, SHAKE_COOLDOWN)) {
-      // Activar animación
-      setIsAnimating(true);
+      // Activar animación de shake
+      setIsCurrentlyShaking(true);
 
-      // Generar nuevo número después de un breve delay
+      // Generar nuevo número después del shake
       setTimeout(() => {
         const newNumber = generateRandomNumber();
         setDiceNumber(newNumber);
-        setIsAnimating(false);
-      }, 800);
+        setIsCurrentlyShaking(false);
+      }, 1500); // Duración total de la animación
       
       // Actualizar tiempo del último shake
       const now = Date.now();
@@ -39,10 +39,10 @@ export default function DiceGame() {
       // Activar cooldown visual
       setIsInCooldown(true);
       
-      // Desactivar cooldown después del tiempo configurado
+      // Desactivar cooldown
       setTimeout(() => {
         setIsInCooldown(false);
-      }, SHAKE_COOLDOWN);
+      }, SHAKE_COOLDOWN + 1500);
     }
   }, [shakeDetected, lastShakeTime]);
 
@@ -65,13 +65,13 @@ export default function DiceGame() {
       <View style={styles.diceContainer}>
         <Dice3D 
           number={diceNumber}
-          isAnimating={isAnimating}
+          isShaking={isCurrentlyShaking}
           style={styles.dice3D}
         />
       </View>
 
       {/* Resultado numérico */}
-      {diceNumber !== null && !isAnimating && (
+      {diceNumber !== null && !isCurrentlyShaking && (
         <View style={styles.resultBadge}>
           <Text style={styles.resultNumber}>{diceNumber}</Text>
         </View>
@@ -79,7 +79,7 @@ export default function DiceGame() {
 
       {/* Indicador de estado */}
       <View style={styles.statusContainer}>
-        {isAnimating ? (
+        {isCurrentlyShaking ? (
           <Text style={styles.statusText}>🎲 Rodando...</Text>
         ) : isInCooldown ? (
           <Text style={styles.statusText}>⏱️ Cooldown...</Text>
@@ -90,7 +90,7 @@ export default function DiceGame() {
         )}
       </View>
 
-      {/* Información de debug (opcional - puedes quitarla) */}
+      {/* Información de debug */}
       <View style={styles.debugContainer}>
         <Text style={styles.debugTitle}>Debug:</Text>
         <Text style={styles.debugText}>

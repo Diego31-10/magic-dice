@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { useLoader } from '@react-three/fiber/native';
+import { useFrame } from '@react-three/fiber/native';
 import { Asset } from 'expo-asset';
 import { GLTFLoader } from 'three-stdlib';
+import { useRef } from 'react';
+import { DiceRotation } from './utils/rotations';
+import * as THREE from 'three';
 
 type DiceModelProps = {
-  rotation: [number, number, number];
+  rotation: DiceRotation;
   scale?: number;
 };
 
@@ -13,33 +16,56 @@ type DiceModelProps = {
  * Maneja la carga asíncrona del archivo .glb
  */
 export function DiceModel({ rotation, scale = 1 }: DiceModelProps) {
-  const [modelUri, setModelUri] = useState<string | null>(null);
+  const [model, setModel] = useState<any>(null);
+  const meshRef = useRef<THREE.Group | null>(null);
 
-  // Cargar el asset del modelo
+  // Cargar el modelo usando GLTFLoader de three-stdlib
   useEffect(() => {
     async function loadModel() {
       try {
+        // Cargar asset
         const asset = Asset.fromModule(require('../../../assets/models/dice.glb'));
         await asset.downloadAsync();
-        setModelUri(asset.localUri || asset.uri);
+        
+        // Crear loader
+        const loader = new GLTFLoader();
+        
+        // Cargar modelo
+        loader.load(
+          asset.localUri || asset.uri,
+          (gltf) => {
+            setModel(gltf.scene);
+          },
+          undefined,
+          (error) => {
+            console.error('Error cargando modelo 3D:', error);
+          }
+        );
       } catch (error) {
-        console.error('Error cargando modelo 3D:', error);
+        console.error('Error al preparar asset:', error);
       }
     }
     loadModel();
   }, []);
 
-  // Cargar el modelo GLTF
-  const gltf = modelUri ? useLoader(GLTFLoader, modelUri) : null;
+  // Actualizar rotación suavemente en cada frame
+  useFrame(() => {
+    if (meshRef.current) {
+      // Interpolar hacia la rotación objetivo (suavizado)
+      meshRef.current.rotation.x += (rotation.x - meshRef.current.rotation.x) * 0.1;
+      meshRef.current.rotation.y += (rotation.y - meshRef.current.rotation.y) * 0.1;
+      meshRef.current.rotation.z += (rotation.z - meshRef.current.rotation.z) * 0.1;
+    }
+  });
 
-  if (!gltf) {
+  if (!model) {
     return null; // Mostrar nada mientras carga
   }
 
   return (
     <primitive
-      object={gltf.scene}
-      rotation={rotation}
+      ref={meshRef}
+      object={model}
       scale={scale}
     />
   );

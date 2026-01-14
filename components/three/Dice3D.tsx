@@ -1,11 +1,10 @@
 import { View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Scene } from './Scene';
-import { useState, useEffect } from 'react';
-import { getRotationForNumber } from './utils/rotations'; // ✅ Esta ruta está correcta
+import { useDiceAnimation } from './hooks/useDiceAnimation';
 
 type Dice3DProps = {
   number?: number | null;
-  isAnimating?: boolean;
+  isShaking?: boolean;
   style?: StyleProp<ViewStyle>;
 };
 
@@ -13,23 +12,15 @@ type Dice3DProps = {
  * Componente principal del dado 3D
  * Props:
  * - number: Número del dado a mostrar (1-6)
- * - isAnimating: Si el dado está en animación
+ * - isShaking: Si el dado está siendo agitado
  * - style: Estilos personalizados del contenedor
  */
 export function Dice3D({ 
   number = null, 
-  isAnimating = false,
+  isShaking = false,
   style 
 }: Dice3DProps) {
-  const [rotation, setRotation] = useState<[number, number, number]>([0, 0, 0]);
-
-  // Actualizar rotación cuando cambia el número
-  useEffect(() => {
-    if (number !== null) {
-      const targetRotation = getRotationForNumber(number);
-      setRotation([targetRotation.x, targetRotation.y, targetRotation.z]);
-    }
-  }, [number]);
+  const { rotation, isAnimating } = useDiceAnimation(number, isShaking);
 
   return (
     <View style={[styles.container, style]}>
