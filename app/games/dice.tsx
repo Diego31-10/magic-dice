@@ -1,9 +1,10 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useAccelerometer } from '../../lib/modules/sensors/accelerometer/useAccelerometer';
 import { isShaking, calculateMagnitude } from '../../lib/core/logic/motion';
 import { generateRandomNumber, canGenerateNumber } from '../../lib/core/logic/dice';
 import { SHAKE_THRESHOLD, SHAKE_COOLDOWN } from '../../lib/core/constants';
+import { Dice3D } from '../../components/three/Dice3D';
 
 export default function DiceGame() {
   const { data, isAvailable } = useAccelerometer();
@@ -12,6 +13,7 @@ export default function DiceGame() {
   const [diceNumber, setDiceNumber] = useState<number | null>(null);
   const [lastShakeTime, setLastShakeTime] = useState<number | null>(null);
   const [isInCooldown, setIsInCooldown] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
 
   // Calcular magnitud y detectar shake
   const magnitude = calculateMagnitude(data);
@@ -20,9 +22,15 @@ export default function DiceGame() {
   // Efecto para generar número cuando se detecta shake
   useEffect(() => {
     if (shakeDetected && canGenerateNumber(lastShakeTime, SHAKE_COOLDOWN)) {
-      // Generar nuevo número
-      const newNumber = generateRandomNumber();
-      setDiceNumber(newNumber);
+      // Activar animación
+      setIsAnimating(true);
+
+      // Generar nuevo número después de un breve delay
+      setTimeout(() => {
+        const newNumber = generateRandomNumber();
+        setDiceNumber(newNumber);
+        setIsAnimating(false);
+      }, 800);
       
       // Actualizar tiempo del último shake
       const now = Date.now();
@@ -53,63 +61,44 @@ export default function DiceGame() {
     <View style={styles.container}>
       <Text style={styles.title}>🎲 Magic Dice</Text>
       
-      {/* Resultado del dado */}
-      <View style={styles.resultContainer}>
-        {diceNumber === null ? (
-          <>
-            <Text style={styles.waitingIcon}>🎲</Text>
-            <Text style={styles.waitingText}>Agita el dispositivo</Text>
-          </>
-        ) : (
-          <>
-            <Text style={styles.diceNumber}>{diceNumber}</Text>
-            <Text style={styles.resultLabel}>Resultado</Text>
-          </>
-        )}
+      {/* Contenedor del dado 3D */}
+      <View style={styles.diceContainer}>
+        <Dice3D 
+          number={diceNumber}
+          isAnimating={isAnimating}
+          style={styles.dice3D}
+        />
       </View>
 
-      {/* Indicador de cooldown */}
-      {isInCooldown && (
-        <View style={styles.cooldownIndicator}>
-          <Text style={styles.cooldownText}>⏱️ Cooldown activo...</Text>
+      {/* Resultado numérico */}
+      {diceNumber !== null && !isAnimating && (
+        <View style={styles.resultBadge}>
+          <Text style={styles.resultNumber}>{diceNumber}</Text>
         </View>
       )}
 
-      {/* Indicador de shake */}
-      <View style={[
-        styles.shakeIndicator, 
-        shakeDetected && !isInCooldown && styles.shakeIndicatorActive
-      ]}>
-        <Text style={styles.shakeText}>
-          {shakeDetected && !isInCooldown ? '🔥 SHAKE!' : '⏳ En espera...'}
-        </Text>
+      {/* Indicador de estado */}
+      <View style={styles.statusContainer}>
+        {isAnimating ? (
+          <Text style={styles.statusText}>🎲 Rodando...</Text>
+        ) : isInCooldown ? (
+          <Text style={styles.statusText}>⏱️ Cooldown...</Text>
+        ) : diceNumber === null ? (
+          <Text style={styles.statusText}>📱 Agita el dispositivo</Text>
+        ) : (
+          <Text style={styles.statusText}>✨ Resultado: {diceNumber}</Text>
+        )}
       </View>
 
-      {/* Información del sensor (para debug) */}
+      {/* Información de debug (opcional - puedes quitarla) */}
       <View style={styles.debugContainer}>
-        <Text style={styles.debugTitle}>Debug Info:</Text>
-        
-        <View style={styles.debugRow}>
-          <Text style={styles.debugLabel}>Magnitud:</Text>
-          <Text style={[
-            styles.debugValue,
-            magnitude > SHAKE_THRESHOLD && styles.debugValueHigh
-          ]}>
-            {magnitude.toFixed(3)}
-          </Text>
-        </View>
-
-        <View style={styles.debugRow}>
-          <Text style={styles.debugLabel}>Umbral:</Text>
-          <Text style={styles.debugValue}>{SHAKE_THRESHOLD.toFixed(3)}</Text>
-        </View>
-
-        <View style={styles.debugRow}>
-          <Text style={styles.debugLabel}>X / Y / Z:</Text>
-          <Text style={styles.debugValue}>
-            {data.x.toFixed(2)} / {data.y.toFixed(2)} / {data.z.toFixed(2)}
-          </Text>
-        </View>
+        <Text style={styles.debugTitle}>Debug:</Text>
+        <Text style={styles.debugText}>
+          Magnitud: {magnitude.toFixed(3)} / Umbral: {SHAKE_THRESHOLD}
+        </Text>
+        <Text style={styles.debugText}>
+          X: {data.x.toFixed(2)} Y: {data.y.toFixed(2)} Z: {data.z.toFixed(2)}
+        </Text>
       </View>
     </View>
   );
@@ -127,100 +116,66 @@ const styles = StyleSheet.create({
     fontSize: 36,
     color: '#fff',
     fontWeight: 'bold',
-    marginBottom: 40,
+    marginBottom: 20,
   },
-  resultContainer: {
+  diceContainer: {
+    width: 300,
+    height: 300,
     backgroundColor: '#16213e',
-    width: 200,
-    height: 200,
     borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 30,
+    overflow: 'hidden',
+    marginBottom: 20,
     borderWidth: 3,
     borderColor: '#6c5ce7',
   },
-  waitingIcon: {
-    fontSize: 64,
-    marginBottom: 10,
+  dice3D: {
+    width: '100%',
+    height: '100%',
   },
-  waitingText: {
-    fontSize: 16,
-    color: '#a0a0a0',
-    textAlign: 'center',
+  resultBadge: {
+    backgroundColor: '#6c5ce7',
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
-  diceNumber: {
-    fontSize: 96,
-    color: '#6c5ce7',
+  resultNumber: {
+    fontSize: 32,
+    color: '#fff',
     fontWeight: 'bold',
   },
-  resultLabel: {
-    fontSize: 14,
-    color: '#a0a0a0',
-    marginTop: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 2,
-  },
-  cooldownIndicator: {
-    backgroundColor: '#ff6b6b',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    marginBottom: 15,
-  },
-  cooldownText: {
-    color: '#fff',
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  shakeIndicator: {
+  statusContainer: {
     backgroundColor: '#16213e',
     paddingHorizontal: 30,
     paddingVertical: 15,
     borderRadius: 25,
     marginBottom: 30,
-    borderWidth: 2,
-    borderColor: '#2d3561',
   },
-  shakeIndicatorActive: {
-    backgroundColor: '#6c5ce7',
-    borderColor: '#a29bfe',
-  },
-  shakeText: {
+  statusText: {
     fontSize: 16,
     color: '#fff',
-    fontWeight: 'bold',
+    fontWeight: '600',
   },
   debugContainer: {
     backgroundColor: '#16213e',
-    padding: 20,
-    borderRadius: 15,
+    padding: 15,
+    borderRadius: 10,
     width: '100%',
     maxWidth: 350,
   },
   debugTitle: {
     fontSize: 12,
     color: '#636e72',
-    marginBottom: 10,
+    marginBottom: 5,
     textTransform: 'uppercase',
-    letterSpacing: 1,
   },
-  debugRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  debugLabel: {
-    fontSize: 12,
+  debugText: {
+    fontSize: 11,
     color: '#a0a0a0',
-  },
-  debugValue: {
-    fontSize: 12,
-    color: '#74b9ff',
     fontFamily: 'monospace',
-  },
-  debugValueHigh: {
-    color: '#00b894',
+    marginBottom: 3,
   },
   errorText: {
     fontSize: 24,
