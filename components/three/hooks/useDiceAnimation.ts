@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { DICE_ROTATIONS, getRandomRotation, DiceRotation } from '../utils/rotations';
+import { useAudioPlayer, setAudioModeAsync } from 'expo-audio';
+import { Vibration } from 'react-native';
 
 export function useDiceAnimation(
   number: number | null,
@@ -11,20 +13,31 @@ export function useDiceAnimation(
   const shakeIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const settlingRef = useRef(false);
   const targetRotationRef = useRef<DiceRotation | null>(null);
+  const dicePlayer = useAudioPlayer(
+    require('../../../assets/sounds/dice.mp3')
+  );
+
+  // 🔊 Configurar audio (OBLIGATORIO para iOS)
+  useEffect(() => {
+    setAudioModeAsync({
+      playsInSilentMode: true,
+    });
+  }, []);
 
   // 🎲 SHAKE (más lento)
   useEffect(() => {
     if (isShaking) {
       settlingRef.current = false;
       targetRotationRef.current = null;
-
+      dicePlayer.seekTo(0);
+      dicePlayer.play();
       shakeIntervalRef.current = setInterval(() => {
         setRotation(prev => ({
-          x: prev.x + 0.25,
-          y: prev.y + 0.3,
-          z: prev.z + 0.2,
+          x: prev.x + 0.06,
+          y: prev.y + 0.09,
+          z: prev.z + 0.05,
         }));
-      }, 30); // 🔥 más lento
+      }, 32); // 🔥 más lento
     }
 
     return () => {
@@ -45,6 +58,7 @@ export function useDiceAnimation(
 
       // objetivo final
       targetRotationRef.current = DICE_ROTATIONS[number];
+      Vibration.vibrate(100);
     }
   }, [number, isShaking]);
 

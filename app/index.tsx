@@ -1,27 +1,32 @@
-import { View, Text, StyleSheet, Pressable } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { Button } from '../components/atoms/Button';
+import { Text } from '../components/atoms/Text';
+import { Icon } from '../components/atoms/Icon';
 
 export default function Home() {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🎲 Magic Dice</Text>
-      <Text style={styles.subtitle}>Shake to Roll</Text>
+      <Icon name="Dices" size={80} color="#6c5ce7" style={styles.logo} />
       
-      <Pressable 
-        style={styles.button}
+      <Text variant="title" align="center">
+        Magic Dice
+      </Text>
+      
+      <Text variant="subtitle" color="secondary" align="center" style={styles.subtitle}>
+        Shake to Roll
+      </Text>
+      
+      <Button 
         onPress={() => router.push('/games/dice')}
+        variant="primary"
+        size="medium"
       >
-        <Text style={styles.buttonText}>Start Game</Text>
-      </Pressable>
-
-      <Pressable 
-        style={[styles.button, styles.buttonSecondary]}
-        onPress={() => router.push('/test-dice')}
-      >
-        <Text style={styles.buttonText}>🔧 Calibrar Dado</Text>
-      </Pressable>
+        <Icon name="Play" size={20} color="#ffffff" />
+        <Text variant="body" bold>Start Game</Text>
+      </Button>
     </View>
   );
 }
@@ -33,35 +38,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
+    gap: 20,
   },
-  title: {
-    fontSize: 48,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 10,
+  logo: {
+    marginBottom: 20,
   },
   subtitle: {
-    fontSize: 18,
-    color: '#a0a0a0',
-    marginBottom: 50,
+    marginBottom: 30,
   },
-  button: {
-    backgroundColor: '#6c5ce7',
-    paddingHorizontal: 40,
-    paddingVertical: 15,
-    borderRadius: 25,
-    marginBottom: 15,
-    minWidth: 200,
-  },
-  buttonSecondary: {
-    backgroundColor: '#16213e',
-    borderWidth: 2,
-    borderColor: '#6c5ce7',
-  },
-  buttonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: '600',
-    textAlign: 'center',
+  secondaryButton: {
+    marginTop: 5,
   },
 });

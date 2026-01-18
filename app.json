@@ -19,8 +19,12 @@
     },
     "android": {
       "adaptiveIcon": {
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "permissions": [
+        "VIBRATE"
+      ]
     },
     "web": {
       "favicon": "./assets/images/favicon.png"
@@ -30,9 +34,12 @@
       [
         "expo-asset",
         {
-          "assets": ["./assets/models/dice.glb"]
+          "assets": [
+            "./assets/models/dice.glb"
+          ]
         }
-      ]
+      ],
+      "expo-audio"
     ]
   }
 }
