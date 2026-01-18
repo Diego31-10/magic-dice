@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useAccelerometer } from '../../lib/modules/sensors/accelerometer/useAccelerometer';
 import { isShaking, calculateMagnitude } from '../../lib/core/logic/motion';
 import { generateRandomNumber, canGenerateNumber } from '../../lib/core/logic/dice';
@@ -11,9 +11,12 @@ export default function DiceGame() {
   
   // Estado del juego
   const [diceNumber, setDiceNumber] = useState<number | null>(null);
-  const [lastShakeTime, setLastShakeTime] = useState<number | null>(null);
-  const [isInCooldown, setIsInCooldown] = useState(false);
   const [isCurrentlyShaking, setIsCurrentlyShaking] = useState(false);
+  const [isInCooldown, setIsInCooldown] = useState(false);
+
+  // Refs para controlar el flujo
+  const lastShakeTimeRef = useRef<number>(0);
+  const isProcessingRef = useRef<boolean>(false);
 
   // Calcular magnitud y detectar shake
   const magnitude = calculateMagnitude(data);
@@ -21,30 +24,39 @@ export default function DiceGame() {
 
   // Efecto para generar número cuando se detecta shake
   useEffect(() => {
-    if (shakeDetected && canGenerateNumber(lastShakeTime, SHAKE_COOLDOWN)) {
+    // Si ya está procesando, ignorar
+    if (isProcessingRef.current) {
+      return;
+    }
+
+    // Si detecta shake y puede generar
+    if (shakeDetected && canGenerateNumber(lastShakeTimeRef.current, SHAKE_COOLDOWN)) {
+      // Marcar como procesando
+      isProcessingRef.current = true;
+      lastShakeTimeRef.current = Date.now();
+
+      console.log('🎲 Shake detectado - iniciando animación');
+      
       // Activar animación de shake
       setIsCurrentlyShaking(true);
+      setDiceNumber(null); // Resetear número durante shake
+      setIsInCooldown(true);
 
       // Generar nuevo número después del shake
       setTimeout(() => {
         const newNumber = generateRandomNumber();
+        console.log('🎯 Número generado:', newNumber);
         setDiceNumber(newNumber);
         setIsCurrentlyShaking(false);
-      }, 1500); // Duración total de la animación
-      
-      // Actualizar tiempo del último shake
-      const now = Date.now();
-      setLastShakeTime(now);
-      
-      // Activar cooldown visual
-      setIsInCooldown(true);
-      
-      // Desactivar cooldown
-      setTimeout(() => {
-        setIsInCooldown(false);
-      }, SHAKE_COOLDOWN + 1500);
+        
+        // Permitir nuevo shake después del cooldown total
+        setTimeout(() => {
+          isProcessingRef.current = false;
+          setIsInCooldown(false);
+        }, SHAKE_COOLDOWN);
+      }, 1500);
     }
-  }, [shakeDetected, lastShakeTime]);
+  }, [shakeDetected]);
 
   if (!isAvailable) {
     return (
@@ -97,7 +109,10 @@ export default function DiceGame() {
           Magnitud: {magnitude.toFixed(3)} / Umbral: {SHAKE_THRESHOLD}
         </Text>
         <Text style={styles.debugText}>
-          X: {data.x.toFixed(2)} Y: {data.y.toFixed(2)} Z: {data.z.toFixed(2)}
+          Shake: {shakeDetected ? 'SÍ' : 'NO'} | Animando: {isCurrentlyShaking ? 'SÍ' : 'NO'}
+        </Text>
+        <Text style={styles.debugText}>
+          Número: {diceNumber ?? 'null'} | Cooldown: {isInCooldown ? 'SÍ' : 'NO'}
         </Text>
       </View>
     </View>

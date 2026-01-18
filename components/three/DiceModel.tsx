@@ -1,72 +1,72 @@
-import { useEffect, useState } from 'react';
+import { useRef, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber/native';
-import { Asset } from 'expo-asset';
-import { GLTFLoader } from 'three-stdlib';
-import { useRef } from 'react';
-import { DiceRotation } from './utils/rotations';
+import { useGLTF } from '@react-three/drei/native';
 import * as THREE from 'three';
+import { DiceRotation } from './utils/rotations';
+import { GLTF } from 'three-stdlib';
 
 type DiceModelProps = {
   rotation: DiceRotation;
   scale?: number;
+  isAnimating?: boolean;
 };
 
-/**
- * Componente que carga y renderiza el modelo 3D del dado
- * Maneja la carga asíncrona del archivo .glb
- */
-export function DiceModel({ rotation, scale = 1 }: DiceModelProps) {
-  const [model, setModel] = useState<any>(null);
-  const meshRef = useRef<THREE.Group | null>(null);
+export function DiceModel({
+  rotation,
+  scale = 1,
+  isAnimating = false,
+}: DiceModelProps) {
+  const meshRef = useRef<THREE.Group>(null!);
 
-  // Cargar el modelo usando GLTFLoader de three-stdlib
-  useEffect(() => {
-    async function loadModel() {
-      try {
-        // Cargar asset
-        const asset = Asset.fromModule(require('../../../assets/models/dice.glb'));
-        await asset.downloadAsync();
-        
-        // Crear loader
-        const loader = new GLTFLoader();
-        
-        // Cargar modelo
-        loader.load(
-          asset.localUri || asset.uri,
-          (gltf) => {
-            setModel(gltf.scene);
-          },
-          undefined,
-          (error) => {
-            console.error('Error cargando modelo 3D:', error);
-          }
-        );
-      } catch (error) {
-        console.error('Error al preparar asset:', error);
-      }
-    }
-    loadModel();
-  }, []);
+  const gltf = useGLTF(
+    require('../../assets/models/dice.glb')
+  ) as GLTF;
 
-  // Actualizar rotación suavemente en cada frame
+  // 🎲 INTERPOLACIÓN SOLO DURANTE SHAKE
   useFrame(() => {
-    if (meshRef.current) {
-      // Interpolar hacia la rotación objetivo (suavizado)
-      meshRef.current.rotation.x += (rotation.x - meshRef.current.rotation.x) * 0.1;
-      meshRef.current.rotation.y += (rotation.y - meshRef.current.rotation.y) * 0.1;
-      meshRef.current.rotation.z += (rotation.z - meshRef.current.rotation.z) * 0.1;
+    if (!meshRef.current) return;
+  
+    const current = meshRef.current.rotation;
+    const target = rotation;
+  
+    // velocidad más lenta
+    const speed = 0.08;
+  
+    current.x += (target.x - current.x) * speed;
+    current.y += (target.y - current.y) * speed;
+    current.z += (target.z - current.z) * speed;
+  
+    // 🎯 rebote sutil
+    const epsilon = 0.005;
+  
+    if (
+      Math.abs(current.x - target.x) < epsilon &&
+      Math.abs(current.y - target.y) < epsilon &&
+      Math.abs(current.z - target.z) < epsilon
+    ) {
+      current.set(
+        target.x + 0.04,
+        target.y,
+        target.z
+      );
+  
+      setTimeout(() => {
+        current.set(target.x, target.y, target.z);
+      }, 60);
     }
   });
-
-  if (!model) {
-    return null; // Mostrar nada mientras carga
-  }
+  
+  
 
   return (
     <primitive
       ref={meshRef}
-      object={model}
+      object={gltf.scene}   // 👈 MUY IMPORTANTE
       scale={scale}
     />
   );
 }
+
+useGLTF.preload(
+  require('../../assets/models/dice.glb')
+);

@@ -10,23 +10,20 @@ type Dice3DProps = {
 
 /**
  * Componente principal del dado 3D
- * Props:
- * - number: Número del dado a mostrar (1-6)
- * - isShaking: Si el dado está siendo agitado
- * - style: Estilos personalizados del contenedor
  */
 export function Dice3D({ 
   number = null, 
   isShaking = false,
   style 
 }: Dice3DProps) {
-  const { rotation, isAnimating } = useDiceAnimation(number, isShaking);
+  const rotation = useDiceAnimation(number, isShaking);
 
   return (
     <View style={[styles.container, style]}>
       <Scene 
         rotation={rotation}
         diceScale={2}
+        isAnimating={isShaking} // Pasar estado de animación
       />
     </View>
   );

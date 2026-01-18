@@ -30,7 +30,7 @@
       [
         "expo-asset",
         {
-          "assets": ["./assets/models"]
+          "assets": ["./assets/models/dice.glb"]
         }
       ]
     ]

@@ -15,6 +15,13 @@ export default function Home() {
       >
         <Text style={styles.buttonText}>Start Game</Text>
       </Pressable>
+
+      <Pressable 
+        style={[styles.button, styles.buttonSecondary]}
+        onPress={() => router.push('/test-dice')}
+      >
+        <Text style={styles.buttonText}>🔧 Calibrar Dado</Text>
+      </Pressable>
     </View>
   );
 }
@@ -43,10 +50,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 40,
     paddingVertical: 15,
     borderRadius: 25,
+    marginBottom: 15,
+    minWidth: 200,
+  },
+  buttonSecondary: {
+    backgroundColor: '#16213e',
+    borderWidth: 2,
+    borderColor: '#6c5ce7',
   },
   buttonText: {
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    textAlign: 'center',
   },
 });

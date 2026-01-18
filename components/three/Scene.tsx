@@ -6,13 +6,14 @@ import { DiceRotation } from './utils/rotations';
 type SceneProps = {
   rotation: DiceRotation;
   diceScale?: number;
+  isAnimating?: boolean; // Nuevo
 };
 
 /**
  * Componente de escena Three.js
  * Configura cámara, luces y renderiza el dado
  */
-export function Scene({ rotation, diceScale = 2 }: SceneProps) {
+export function Scene({ rotation, diceScale = 2, isAnimating = false }: SceneProps) {
   return (
     <Canvas
       camera={{
@@ -39,7 +40,11 @@ export function Scene({ rotation, diceScale = 2 }: SceneProps) {
 
       {/* Modelo del dado con Suspense para carga asíncrona */}
       <Suspense fallback={null}>
-        <DiceModel rotation={rotation} scale={diceScale} />
+        <DiceModel 
+          rotation={rotation} 
+          scale={diceScale}
+          isAnimating={isAnimating} 
+        />
       </Suspense>
     </Canvas>
   );
