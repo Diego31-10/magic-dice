@@ -3,11 +3,11 @@
  */
 
 // Imports de modelos
-import panArribaModel from '../../assets/models/burger/panArriba.glb';
+import panArribaModel from '../../assets/models/burger/panSuperior.glb';
 import carneModel from '../../assets/models/burger/carne.glb';
 import quesoModel from '../../assets/models/burger/queso.glb';
 import lechugaModel from '../../assets/models/burger/lechuga.glb';
-import panAbajoModel from '../../assets/models/burger/panAbajo.glb';
+import panAbajoModel from '../../assets/models/burger/panInferior.glb';
 
 export type Ingredient = 'carne' | 'queso' | 'lechuga';
 

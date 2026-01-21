@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber/native';
 import { Canvas } from '@react-three/fiber/native';
 import { Suspense } from 'react';
@@ -18,7 +18,7 @@ type BurgerStackProps = {
 
 /**
  * Componente molecular que renderiza la pila completa de la hamburguesa
- * Calcula posiciones verticales automáticamente y aplica rotación continua
+ * Calcula posiciones verticales automáticamente y centra la hamburguesa
  */
 function BurgerScene({ ingredients }: BurgerStackProps) {
   const groupRef = useRef<THREE.Group>(null!);
@@ -26,20 +26,40 @@ function BurgerScene({ ingredients }: BurgerStackProps) {
   // Rotación continua en eje Y
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += 0.005; // Rotación lenta
+      groupRef.current.rotation.y += 0.005;
     }
   });
 
-  // Calcular altura acumulada para apilar ingredientes
+  // Calcular altura total de la hamburguesa
+  const totalHeight = useMemo(() => {
+    let height = BASE_BUN_HEIGHT; // Pan de abajo
+    
+    // Sumar altura de cada ingrediente
+    ingredients.forEach(ingredient => {
+      height += INGREDIENT_CONFIGS[ingredient].height;
+    });
+    
+    // Agregar pan de arriba si hay ingredientes
+    if (ingredients.length > 0) {
+      height += TOP_BUN_HEIGHT;
+    }
+    
+    return height;
+  }, [ingredients]);
+
+  // Offset para centrar (la mitad de la altura total)
+  const centerOffset = -totalHeight / 2;
+
+  // Calcular posición Y para cada elemento (relativa al centro)
   const calculateYPosition = (index: number): number => {
-    let totalHeight = BASE_BUN_HEIGHT;
+    let yPosition = centerOffset + BASE_BUN_HEIGHT;
     
     for (let i = 0; i < index; i++) {
       const ingredient = ingredients[i];
-      totalHeight += INGREDIENT_CONFIGS[ingredient].height;
+      yPosition += INGREDIENT_CONFIGS[ingredient].height;
     }
     
-    return totalHeight;
+    return yPosition;
   };
 
   return (
@@ -49,16 +69,16 @@ function BurgerScene({ ingredients }: BurgerStackProps) {
       <directionalLight position={[5, 5, 5]} intensity={1} />
       <directionalLight position={[-5, -5, 5]} intensity={0.4} />
 
-      {/* Grupo con rotación */}
+      {/* Grupo con rotación - ahora centrado */}
       <group ref={groupRef}>
-        {/* Pan de abajo (base) */}
+        {/* Pan de abajo (base) - centrado */}
         <GLTFModel 
           modelPath={BUN_MODELS.bottom}
-          position={[0, 0, 0]}
+          position={[0, centerOffset, 0]}
           scale={1}
         />
 
-        {/* Ingredientes apilados */}
+        {/* Ingredientes apilados - centrados */}
         {ingredients.map((ingredient, index) => {
           const yPosition = calculateYPosition(index);
           
@@ -72,7 +92,7 @@ function BurgerScene({ ingredients }: BurgerStackProps) {
           );
         })}
 
-        {/* Pan de arriba */}
+        {/* Pan de arriba - centrado */}
         {ingredients.length > 0 && (
           <GLTFModel
             modelPath={BUN_MODELS.top}
