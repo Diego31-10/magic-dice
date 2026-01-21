@@ -3,6 +3,8 @@ import { Text } from '../../components/atoms/Text';
 import { Button } from '../../components/atoms/Button';
 import { Icon } from '../../components/atoms/Icon';
 import { useBurger } from '../../context/BurgerContext';
+import { BurgerStack } from '../../components/molecules/BurgerStack';
+import { INGREDIENT_CONFIGS } from '../../lib/types/burger.types';
 
 export default function BurgerBuilder() {
   const { 
@@ -24,11 +26,9 @@ export default function BurgerBuilder() {
         Burger Builder
       </Text>
 
-      <View style={styles.placeholder}>
-        <Icon name="ChefHat" size={80} color="#6c5ce7" />
-        <Text variant="subtitle" color="secondary" align="center">
-          3D Viewer - Coming in Phase 2
-        </Text>
+      {/* Visualizador 3D */}
+      <View style={styles.viewer3D}>
+        <BurgerStack ingredients={ingredients} />
       </View>
 
       {/* Lista de ingredientes */}
@@ -38,12 +38,12 @@ export default function BurgerBuilder() {
         </Text>
         {ingredients.length === 0 ? (
           <Text variant="caption" color="secondary">
-            No ingredients yet
+            No ingredients yet - Add some below!
           </Text>
         ) : (
           ingredients.map((ing, index) => (
             <Text key={index} variant="caption" color="secondary">
-              {index + 1}. {ing}
+              {index + 1}. {INGREDIENT_CONFIGS[ing].name}
             </Text>
           ))
         )}
@@ -127,17 +127,15 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     gap: 20,
-    paddingBottom: 40, // Espacio extra al final
+    paddingBottom: 40,
   },
-  placeholder: {
-    height: 300,
+  viewer3D: {
+    height: 350,
     backgroundColor: '#16213e',
     borderRadius: 20,
     borderWidth: 3,
     borderColor: '#6c5ce7',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 20,
+    overflow: 'hidden',
   },
   ingredientList: {
     backgroundColor: '#16213e',

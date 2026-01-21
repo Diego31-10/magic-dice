@@ -2,38 +2,51 @@
  * Tipos para el sistema de hamburguesas
  */
 
+// Imports de modelos
+import panArribaModel from '../../assets/models/burger/panArriba.glb';
+import carneModel from '../../assets/models/burger/carne.glb';
+import quesoModel from '../../assets/models/burger/queso.glb';
+import lechugaModel from '../../assets/models/burger/lechuga.glb';
+import panAbajoModel from '../../assets/models/burger/panAbajo.glb';
+
 export type Ingredient = 'carne' | 'queso' | 'lechuga';
 
 export type IngredientConfig = {
   type: Ingredient;
   name: string;
-  modelPath: any; // Asset del modelo
-  height: number; // Altura aproximada para apilamiento
-  color: string;  // Color del botón
+  modelPath: any;
+  height: number;
+  color: string;
 };
 
 export const INGREDIENT_CONFIGS: Record<Ingredient, IngredientConfig> = {
   carne: {
     type: 'carne',
     name: 'Meat',
-    modelPath: null, // Se llenará en la fase 2
+    modelPath: carneModel,
     height: 0.3,
     color: '#8B4513',
   },
   queso: {
     type: 'queso',
     name: 'Cheese',
-    modelPath: null,
+    modelPath: quesoModel,
     height: 0.2,
     color: '#FFD700',
   },
   lechuga: {
     type: 'lechuga',
     name: 'Lettuce',
-    modelPath: null,
+    modelPath: lechugaModel,
     height: 0.15,
     color: '#90EE90',
   },
+};
+
+// Modelos de panes
+export const BUN_MODELS = {
+  top: panArribaModel,
+  bottom: panAbajoModel,
 };
 
 export const MAX_INGREDIENTS = 7;
