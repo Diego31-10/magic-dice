@@ -4,7 +4,8 @@ import { Button } from '../../components/atoms/Button';
 import { Icon } from '../../components/atoms/Icon';
 import { useBurger } from '../../context/BurgerContext';
 import { BurgerStack } from '../../components/molecules/BurgerStack';
-import { INGREDIENT_CONFIGS } from '../../lib/types/burger.types';
+import { PriceDisplay } from '../../components/molecules/PriceDisplay';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function BurgerBuilder() {
   const { 
@@ -13,15 +14,18 @@ export default function BurgerBuilder() {
     removeLastIngredient,
     clearBurger,
     canAddMore,
-    ingredientCount 
+    ingredientCount,
+    totalPrice, // ✅ NUEVO
   } = useBurger();
 
   return (
+    <SafeAreaView style={styles.safe}>
     <ScrollView 
       style={styles.scrollView}
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
+        
       <Text variant="title" align="center">
         Burger Builder
       </Text>
@@ -31,23 +35,8 @@ export default function BurgerBuilder() {
         <BurgerStack ingredients={ingredients} />
       </View>
 
-      {/* Lista de ingredientes */}
-      <View style={styles.ingredientList}>
-        <Text variant="body" color="accent" bold>
-          Ingredients ({ingredientCount}/7):
-        </Text>
-        {ingredients.length === 0 ? (
-          <Text variant="caption" color="secondary">
-            No ingredients yet - Add some below!
-          </Text>
-        ) : (
-          ingredients.map((ing, index) => (
-            <Text key={index} variant="caption" color="secondary">
-              {index + 1}. {INGREDIENT_CONFIGS[ing].name}
-            </Text>
-          ))
-        )}
-      </View>
+      {/* ✅ NUEVO: Display de precios */}
+      <PriceDisplay ingredients={ingredients} totalPrice={totalPrice} />
 
       {/* Botones de ingredientes */}
       <View style={styles.buttonGroup}>
@@ -61,7 +50,10 @@ export default function BurgerBuilder() {
           style={[styles.ingredientButton, { backgroundColor: '#8B4513' }]}
         >
           <Icon name="Beef" size={20} color="#ffffff" />
-          <Text variant="body" bold>Meat</Text>
+          <View style={styles.buttonContent}>
+            <Text variant="body" bold>Meat</Text>
+            <Text variant="caption" style={styles.priceTag}>$1.00</Text>
+          </View>
         </Button>
 
         <Button
@@ -72,7 +64,10 @@ export default function BurgerBuilder() {
           style={[styles.ingredientButton, { backgroundColor: '#FFD700' }]}
         >
           <Icon name="Pizza" size={20} color="#ffffff" />
-          <Text variant="body" bold>Cheese</Text>
+          <View style={styles.buttonContent}>
+            <Text variant="body" bold>Cheese</Text>
+            <Text variant="caption" style={styles.priceTag}>$0.75</Text>
+          </View>
         </Button>
 
         <Button
@@ -83,7 +78,10 @@ export default function BurgerBuilder() {
           style={[styles.ingredientButton, { backgroundColor: '#90EE90' }]}
         >
           <Icon name="Salad" size={20} color="#ffffff" />
-          <Text variant="body" bold>Lettuce</Text>
+          <View style={styles.buttonContent}>
+            <Text variant="body" bold>Lettuce</Text>
+            <Text variant="caption" style={styles.priceTag}>$0.50</Text>
+          </View>
         </Button>
       </View>
 
@@ -116,19 +114,23 @@ export default function BurgerBuilder() {
         </Text>
       )}
     </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollView: {
-    flex: 1,
-    backgroundColor: '#1a1a2e',
-  },
-  container: {
-    padding: 20,
-    gap: 20,
-    paddingBottom: 40,
-  },
+    safe: {
+        flex: 1,
+        backgroundColor: '#1a1a2e',
+      },
+      scrollView: {
+        flex: 1,
+      },
+      container: {
+        padding: 15,
+        gap: 20,
+        paddingBottom: 15,
+    },
   viewer3D: {
     height: 350,
     backgroundColor: '#16213e',
@@ -137,21 +139,28 @@ const styles = StyleSheet.create({
     borderColor: '#6c5ce7',
     overflow: 'hidden',
   },
-  ingredientList: {
-    backgroundColor: '#16213e',
-    padding: 15,
-    borderRadius: 10,
-    gap: 5,
-  },
   buttonGroup: {
     gap: 10,
   },
   ingredientButton: {
     minWidth: 0,
+    justifyContent: 'flex-start',
+    paddingHorizontal: 20,
+  },
+  buttonContent: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  priceTag: {
+    color: '#ffffff',
+    opacity: 0.9,
   },
   controlButtons: {
     flexDirection: 'row',
     gap: 10,
     justifyContent: 'space-between',
   },
+  
 });

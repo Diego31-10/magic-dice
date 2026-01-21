@@ -37,15 +37,6 @@ export default function Home() {
         <Text variant="body" bold>Burger Builder</Text>
       </Button>
 
-      <Button 
-        onPress={() => router.push('/test-dice')}
-        variant="secondary"
-        size="medium"
-        style={styles.secondaryButton}
-      >
-        <Icon name="Settings" size={20} color="#ffffff" />
-        <Text variant="body" bold>Calibrate Dice</Text>
-      </Button>
     </View>
   );
 }

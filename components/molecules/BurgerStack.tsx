@@ -26,23 +26,18 @@ function BurgerScene({ ingredients }: BurgerStackProps) {
   // Rotación continua en eje Y
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += 0.005;
+      groupRef.current.rotation.y += 0.013;//Velocidad de girox
     }
   });
 
-  // Calcular altura total de la hamburguesa
+  // Calcular altura total de la hamburguesa (SIEMPRE incluye ambos panes)
   const totalHeight = useMemo(() => {
-    let height = BASE_BUN_HEIGHT; // Pan de abajo
+    let height = BASE_BUN_HEIGHT + TOP_BUN_HEIGHT; // ✅ Ambos panes siempre
     
     // Sumar altura de cada ingrediente
     ingredients.forEach(ingredient => {
       height += INGREDIENT_CONFIGS[ingredient].height;
     });
-    
-    // Agregar pan de arriba si hay ingredientes
-    if (ingredients.length > 0) {
-      height += TOP_BUN_HEIGHT;
-    }
     
     return height;
   }, [ingredients]);
@@ -62,6 +57,18 @@ function BurgerScene({ ingredients }: BurgerStackProps) {
     return yPosition;
   };
 
+  // Posición del pan superior (calculada dinámicamente)
+  const topBunYPosition = useMemo(() => {
+    let yPosition = centerOffset + BASE_BUN_HEIGHT;
+    
+    // Sumar altura de todos los ingredientes
+    ingredients.forEach(ingredient => {
+      yPosition += INGREDIENT_CONFIGS[ingredient].height;
+    });
+    
+    return yPosition;
+  }, [ingredients, centerOffset]);
+
   return (
     <>
       {/* Luces */}
@@ -71,14 +78,14 @@ function BurgerScene({ ingredients }: BurgerStackProps) {
 
       {/* Grupo con rotación - ahora centrado */}
       <group ref={groupRef}>
-        {/* Pan de abajo (base) - centrado */}
+        {/* Pan de abajo (base) - SIEMPRE visible */}
         <GLTFModel 
           modelPath={BUN_MODELS.bottom}
           position={[0, centerOffset, 0]}
           scale={1}
         />
 
-        {/* Ingredientes apilados - centrados */}
+        {/* Ingredientes apilados */}
         {ingredients.map((ingredient, index) => {
           const yPosition = calculateYPosition(index);
           
@@ -92,14 +99,12 @@ function BurgerScene({ ingredients }: BurgerStackProps) {
           );
         })}
 
-        {/* Pan de arriba - centrado */}
-        {ingredients.length > 0 && (
-          <GLTFModel
-            modelPath={BUN_MODELS.top}
-            position={[0, calculateYPosition(ingredients.length), 0]}
-            scale={1}
-          />
-        )}
+        {/* Pan de arriba - ✅ SIEMPRE visible (incluso sin ingredientes) */}
+        <GLTFModel
+          modelPath={BUN_MODELS.top}
+          position={[0, topBunYPosition, 0]}
+          scale={1}
+        />
       </group>
     </>
   );

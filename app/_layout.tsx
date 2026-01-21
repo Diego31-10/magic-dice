@@ -22,10 +22,8 @@ export default function RootLayout() {
         />
         <Stack.Screen 
           name="burger/index" 
-          options={{ 
-            title: 'Burger Builder',
-            headerShown: true,
-            headerBackTitle: 'Back'
+          options={{
+            headerShown: false 
           }} 
         />
         <Stack.Screen 

@@ -1,5 +1,10 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
-import { Ingredient, MAX_INGREDIENTS } from '../lib/types/burger.types';
+import { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import { 
+  Ingredient, 
+  MAX_INGREDIENTS, 
+  INGREDIENT_CONFIGS,
+  BASE_BUN_PRICE 
+} from '../lib/types/burger.types';
 
 type BurgerContextType = {
   ingredients: Ingredient[];
@@ -8,6 +13,7 @@ type BurgerContextType = {
   clearBurger: () => void;
   canAddMore: boolean;
   ingredientCount: number;
+  totalPrice: number; // ✅ NUEVO
 };
 
 const BurgerContext = createContext<BurgerContextType | undefined>(undefined);
@@ -43,6 +49,19 @@ export function BurgerProvider({ children }: BurgerProviderProps) {
   const canAddMore = ingredients.length < MAX_INGREDIENTS;
   const ingredientCount = ingredients.length;
 
+  // ✅ NUEVO: Calcular precio total
+  const totalPrice = useMemo(() => {
+    // Precio base de los panes
+    let price = BASE_BUN_PRICE;
+    
+    // Sumar precio de cada ingrediente
+    ingredients.forEach(ingredient => {
+      price += INGREDIENT_CONFIGS[ingredient].price;
+    });
+    
+    return price;
+  }, [ingredients]);
+
   return (
     <BurgerContext.Provider
       value={{
@@ -52,6 +71,7 @@ export function BurgerProvider({ children }: BurgerProviderProps) {
         clearBurger,
         canAddMore,
         ingredientCount,
+        totalPrice, // ✅ NUEVO
       }}
     >
       {children}

@@ -17,6 +17,7 @@ export type IngredientConfig = {
   modelPath: any;
   height: number;
   color: string;
+  price: number; // ✅ NUEVO
 };
 
 export const INGREDIENT_CONFIGS: Record<Ingredient, IngredientConfig> = {
@@ -26,6 +27,7 @@ export const INGREDIENT_CONFIGS: Record<Ingredient, IngredientConfig> = {
     modelPath: carneModel,
     height: 0.3,
     color: '#8B4513',
+    price: 1.00, // ✅ NUEVO
   },
   queso: {
     type: 'queso',
@@ -33,6 +35,7 @@ export const INGREDIENT_CONFIGS: Record<Ingredient, IngredientConfig> = {
     modelPath: quesoModel,
     height: 0.2,
     color: '#FFD700',
+    price: 0.75, // ✅ NUEVO
   },
   lechuga: {
     type: 'lechuga',
@@ -40,6 +43,7 @@ export const INGREDIENT_CONFIGS: Record<Ingredient, IngredientConfig> = {
     modelPath: lechugaModel,
     height: 0.15,
     color: '#90EE90',
+    price: 0.50, // ✅ NUEVO
   },
 };
 
@@ -48,6 +52,9 @@ export const BUN_MODELS = {
   top: panArribaModel,
   bottom: panAbajoModel,
 };
+
+// Precio base de los panes
+export const BASE_BUN_PRICE = 1; // ✅ NUEVO
 
 export const MAX_INGREDIENTS = 7;
 
