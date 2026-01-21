@@ -27,6 +27,25 @@ export default function Home() {
         <Icon name="Play" size={20} color="#ffffff" />
         <Text variant="body" bold>Start Game</Text>
       </Button>
+
+      <Button 
+        onPress={() => router.push('/burger')}
+        variant="primary"
+        size="medium"
+      >
+        <Icon name="ChefHat" size={20} color="#ffffff" />
+        <Text variant="body" bold>Burger Builder</Text>
+      </Button>
+
+      <Button 
+        onPress={() => router.push('/test-dice')}
+        variant="secondary"
+        size="medium"
+        style={styles.secondaryButton}
+      >
+        <Icon name="Settings" size={20} color="#ffffff" />
+        <Text variant="body" bold>Calibrate Dice</Text>
+      </Button>
     </View>
   );
 }
@@ -38,15 +57,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
-    gap: 20,
+    gap: 15,
   },
   logo: {
     marginBottom: 20,
   },
   subtitle: {
-    marginBottom: 30,
+    marginBottom: 20,
   },
   secondaryButton: {
-    marginTop: 5,
+    marginTop: 10,
   },
 });
