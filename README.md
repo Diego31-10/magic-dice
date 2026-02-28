@@ -1,6 +1,6 @@
 # Magic Dice
 
-A cross-platform mobile app that rolls a 3D dice by detecting device shake gestures via the accelerometer.
+A cross-platform mobile app to test and learn device accelerometer and rendering 3D models made in Blender on three.js
 
 ## Overview
 
