@@ -1,53 +1,65 @@
-> Edited for use in IDX on 07/09/12
+# Magic Dice
 
-# Welcome to your Expo app 👋
+A cross-platform mobile app that rolls a 3D dice by detecting device shake gestures via the accelerometer.
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+## Overview
 
-## Get started
+Magic Dice is a React Native mobile application built with Expo. It uses the device's accelerometer to detect shake gestures and triggers a 3D dice roll animation rendered with Three.js. The app also includes a Burger Builder mini-game that lets users stack ingredients and calculate a running total price. Both features demonstrate sensor integration, 3D rendering on mobile, and component-based UI architecture.
 
-#### Android
+## Tech Stack
 
-Android previews are defined as a `workspace.onStart` hook and started as a vscode task when the workspace is opened/started.
+- **Framework**: React Native 0.81 / Expo 54
+- **Language**: TypeScript
+- **Routing**: Expo Router (file-based)
+- **3D Rendering**: Three.js, @react-three/fiber, @react-three/drei, expo-gl
+- **Sensors**: expo-sensors (accelerometer)
+- **Audio / Haptics**: expo-audio, expo-haptics
+- **State Management**: React Context API
+- **Linting**: ESLint (eslint-config-expo)
 
-Note, if you can't find the task, either:
-- Rebuild the environment (using command palette: `IDX: Rebuild Environment`), or
-- Run `npm run android -- --tunnel` command manually run android and see the output in your terminal. The device should pick up this new command and switch to start displaying the output from it.
+## Features
 
-In the output of this command/task, you'll find options to open the app in a
+- **Shake-to-roll**: Detects device shake through the accelerometer and generates a random number between 1 and 6 with a configurable cooldown to prevent duplicate triggers.
+- **3D dice rendering**: Renders a GLTF dice model in real time using WebGL via @react-three/fiber, with a rolling animation on each shake event.
+- **Burger Builder**: An interactive ingredient-stacking UI that lets users add or remove toppings (meat, cheese, lettuce) and displays a live price total.
+- **Cross-platform**: Runs on Android, iOS, and Web from a single codebase.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Installation
 
-You'll also find options to open the app's developer menu, reload the app, and more.
-
-#### Web
-
-Web previews will be started and managred automatically. Use the toolbar to manually refresh.
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+**Prerequisites**: Node.js 18+, npm, and the Expo CLI.
 
 ```bash
-npm run reset-project
+git clone https://github.com/Diego31-10/magic-dice.git
+cd magic-dice
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Usage
 
-## Learn more
+Start the development server:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npx expo start
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Then choose a target platform:
 
-## Join the community
+| Command | Platform |
+|---|---|
+| `npm run android` | Android emulator or device |
+| `npm run ios` | iOS simulator or device |
+| `npm run web` | Browser |
 
-Join our community of developers creating universal apps.
+Once the app is running, navigate to **Start Game** on the home screen and shake your device to roll the dice. Open **Burger Builder** to stack ingredients and view the running price total.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Project Status
+
+MVP — core features are complete and functional. Future work may include multiplayer support, additional dice types, and persistent score history.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE).
+
+## Author
+
+Diego — [GitHub](https://github.com/Diego31-10)
